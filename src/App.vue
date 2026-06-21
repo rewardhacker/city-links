@@ -8,9 +8,9 @@
         </a>
         <div class='nav-links'>
           <div class='nav-item' :class='{"sub-open": showSettings}'>
-            <a href="#" class='print-button' :class='{active: showSettings}' @click.prevent='toggleSettings'>Customize</a>
+            <a href="#" class='print-button' :class='{active: showSettings}' @click.prevent='toggleSettings'>Customise</a>
           </div>
-          <a href="#" class='try-another' @click.prevent='startOver'>Try another city</a>
+          <a href="#" class='try-another' @click.prevent='startOver'>Try Another City</a>
         </div>
       </div>
       <div v-if='showSettings' class='print-window'>
@@ -24,7 +24,7 @@
 
         <h3>Animation</h3>
         <div class='row'>
-          <label class='col' for='animate-roads'>Animate roads connecting</label>
+          <label class='col' for='animate-roads'>Animate Roads</label>
           <div class='col c-2'>
             <div class='checkbox-wrapper-9'>
               <input class='tgl tgl-flat' id='animate-roads' type='checkbox' v-model='animateRoads' @change='saveAnimationPrefs'>
@@ -33,7 +33,7 @@
           </div>
         </div>
         <div class='row' v-if='animateRoads'>
-          <label class='col' for='connect-time'>Connect time</label>
+          <label class='col' for='connect-time'>Connect Time</label>
           <div class='col c-2 duration-control'>
             <input id='connect-time' type='range' min='300' max='10000' step='100' v-model.number='animationSpeed' @change='saveAnimationPrefs'>
             <input type='number' min='100' step='100' class='duration-input' v-model.number='animationSpeed' @change='saveAnimationPrefs'>
@@ -41,21 +41,21 @@
           </div>
         </div>
         <div class='row' v-if='animateRoads'>
-          <label class='col' for='reveal-order'>Reveal order</label>
+          <label class='col' for='reveal-order'>Reveal Order</label>
           <div class='col c-2'>
             <select id='reveal-order' v-model='revealOrder' @change='saveAnimationPrefs'>
               <option value='original'>Original</option>
-              <option value='center-out'>Center out</option>
-              <option value='outside-in'>Outside in</option>
+              <option value='center-out'>Centre Out</option>
+              <option value='outside-in'>Outside In</option>
               <option value='random'>Random</option>
-              <option value='bfs'>Breadth-first</option>
-              <option value='dfs'>Depth-first</option>
+              <option value='bfs'>Breadth-First</option>
+              <option value='dfs'>Depth-First</option>
               <option value='spiral'>Spiral</option>
             </select>
           </div>
         </div>
         <div class='row' v-if='animateRoads'>
-          <label class='col' for='loop-animation'>Loop animation</label>
+          <label class='col' for='loop-animation'>Loop Animation</label>
           <div class='col c-2'>
             <div class='checkbox-wrapper-9'>
               <input class='tgl tgl-flat' id='loop-animation' type='checkbox' v-model='loopAnimation' @change='saveAnimationPrefs'>
@@ -72,7 +72,7 @@
 
         <h3>Display</h3>
         <div class='row'>
-          <div class='col'>Colors</div>
+          <div class='col'>Colours</div>
           <div class='col colors c-2'>
             <div v-for='layer in layers' :key='layer.name' class='color-container'>
               <color-picker v-model='layer.color' @change='layer.changeColor'></color-picker>
@@ -83,20 +83,20 @@
 
         <h3>Export</h3>
         <div class='row'>
-          <a href='#'  @click.prevent='toPNGFile' class='col'>As an image (.png)</a> 
+          <a href='#'  @click.prevent='toPNGFile' class='col'>As an Image (.png)</a>
           <span class='col c-2'>
             Save the current screen as a raster image.
           </span>
         </div>
         
         <div class='row'>
-          <a href='#'  @click.prevent='toSVGFile' class='col'>As a vector (.svg)</a>
+          <a href='#'  @click.prevent='toSVGFile' class='col'>As a Vector (.svg)</a>
           <span class='col c-2'>
             Save the current screen as a vector image.
           </span>
         </div>
         <div class='row'>
-          <a href='#' @click.prevent='exportAnimation' class='col'>{{exportingAnimation ? 'Recording...' : 'As a video (.webm)'}}</a>
+          <a href='#' @click.prevent='exportAnimation' class='col'>{{exportingAnimation ? 'Recording...' : 'As a Video (.webm)'}}</a>
           <span class='col c-2'>
             Record the reveal animation and save it as a video.
           </span>
@@ -463,15 +463,20 @@ function toRGBA(c) {
 .col {
     display: flex;
     flex: 1;
+    align-items: center;
+    &:not(.c-2) {
+      white-space: nowrap;
+    }
     select {
       margin-left: 14px;
     }
   }
 .row {
-  margin-top: 4px;
+  margin-top: 18px;
   display: flex;
   flex-direction: row;
   min-height: 32px;
+  align-items: center;
 }
 .palettes {
   flex-wrap: wrap;
@@ -495,6 +500,26 @@ function toRGBA(c) {
 }
 .duration-control {
   align-items: center;
+}
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  background: emphasis-background url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2346423B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 10px center;
+  background-size: 11px;
+  border: 1px solid border-color;
+  border-radius: 8px;
+  color: primary-text;
+  font-size: 13px;
+  padding: 5px 30px 5px 10px;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  &:hover {
+    border-color: highlight-color;
+  }
+  &:focus {
+    outline: 2px solid highlight-color;
+    outline-offset: 1px;
+  }
 }
 .duration-input {
   width: 64px;
@@ -531,6 +556,7 @@ function toRGBA(c) {
 
   .color-label {
     font-size: 12px;
+    text-transform: capitalize;
   }
 }
 

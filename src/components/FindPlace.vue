@@ -378,14 +378,14 @@ input {
   border: none;
   flex: 1;
   background: transparent;
-  font-family: 'Lora', Georgia, serif;
+  font-family: labels-font;
   padding: 0;
   color: primary-text;
   height: 100%;
   font-size: 16px;
-  &:focus {
-    outline: 2px solid primary-text;
-    outline-offset: 2px;
+  outline: none;
+  &::placeholder {
+    color: secondary-color;
   }
 }
 
@@ -395,13 +395,17 @@ input {
   padding: 0 8px;
   padding: 0 0 0 8px;
 
-  border-bottom: 0.5px solid border-color;
+  border-bottom: 1px solid border-color;
   height: 48px;
   display: flex;
   font-size: 16px;
   cursor: text;
   border-radius: squircle;
   overflow: hidden;
+  transition: border-color 0.2s ease;
+  &:focus-within {
+    border-bottom-color: highlight-color;
+  }
   a {
     cursor: pointer;
   }
