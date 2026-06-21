@@ -400,7 +400,7 @@ input {
   display: flex;
   font-size: 16px;
   cursor: text;
-  border-radius: squircle;
+  border-radius: squircle squircle 0 0;
   overflow: hidden;
   transition: border-color 0.2s ease;
   &:focus-within {
@@ -463,7 +463,6 @@ input {
 .suggestions {
   position: relative;
   background: emphasis-background
-  border-radius: squircle;
   overflow: hidden;
   .note {
     font-size: 10px;
@@ -483,18 +482,28 @@ input {
 
 .message,
 .loading {
-  padding: 4px 8px;
+  padding: 10px 12px 10px 40px;
   position: relative;
   color: primary-text;
 }
 .loading svg {
-  margin-right: 8px;
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .shadow {
   border: 0.5px solid border-color;
-  border-radius: squircle;
+  border-top: none;
+  border-radius: 0 0 squircle squircle;
   overflow: hidden;
+}
+
+// .prompt is a centered note (no icon gutter), unlike the icon-led
+// .loading/.error text - keep its own symmetric padding.
+.prompt.message {
+  padding: 10px 12px;
 }
 
 .error {
@@ -520,7 +529,7 @@ input {
   transform: translateX(-50%) translateY(-143px);
 }
 .load-padding {
-  padding-left: 16px;
+  margin-top: 4px;
 }
 .description {
   padding: 8px;
@@ -531,8 +540,8 @@ input {
 
 .cancel-request {
   position: absolute;
-  right: 4px;
-  top: 4px;
+  right: 12px;
+  top: 10px;
   font-size: 12px;
 }
 .error-note {
