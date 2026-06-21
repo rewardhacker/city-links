@@ -7,6 +7,40 @@
         <a href="#" class='try-another' @click.prevent='startOver'>Try another city</a>
       </div>
       <div v-if='showSettings' class='print-window'>
+        <h3>Palettes</h3>
+        <div class='row palettes'>
+          <a href='#' v-for='p in palettes' :key='p.name' class='palette-swatch' :title='p.name'
+             @click.prevent='applyPalette(p)' :style='{background: p.background, borderColor: p.line}'>
+            <span :style='{background: p.line}'></span>
+          </a>
+        </div>
+
+        <h3>Animation</h3>
+        <div class='row'>
+          <label class='col'>
+            <input type='checkbox' v-model='animateRoads' @change='saveAnimationPrefs'>
+            Animate roads connecting
+          </label>
+        </div>
+        <div class='row' v-if='animateRoads'>
+          <div class='col'>Connect time</div>
+          <div class='col c-2'>
+            <input type='range' min='300' max='3000' step='100' v-model.number='animationSpeed' @change='saveAnimationPrefs'>
+            <span class='duration-label'>{{(animationSpeed/1000).toFixed(1)}}s</span>
+          </div>
+        </div>
+        <div class='row' v-if='animateRoads'>
+          <div class='col'>Reveal order</div>
+          <div class='col c-2'>
+            <select v-model='revealOrder' @change='saveAnimationPrefs'>
+              <option value='original'>Original</option>
+              <option value='center-out'>Center out</option>
+              <option value='outside-in'>Outside in</option>
+              <option value='random'>Random</option>
+            </select>
+          </div>
+        </div>
+
         <h3>Display</h3>
         <div class='row'>
           <div class='col'>Colors</div>
@@ -57,13 +91,11 @@
 
         <h3>About</h3>
         <div>
-          <p>This website was created by <a href='https://twitter.com/anvaka' target='_blank'>@anvaka</a>.
-          It downloads roads from OpenStreetMap and renders them with WebGL.
+          <p>This website was created by <a href='https://instagram.com/localponders' target='_blank'>@localponders</a>.
+          It downloads roads from OpenStreetMap and renders them with WebGL. Visit <a href='https://jakadin.com' target='_blank'>jakadin.com</a> for more.
           </p>
           <p>
-           You can find the entire <a href='https://github.com/anvaka/city-roads'>source code here</a>. 
-           If you love this website you can also <a href='https://www.paypal.com/paypalme2/anvakos/3'>buy me a coffee</a> or 
-           <a href='https://www.patreon.com/anvaka'>support me on Patreon</a>, but you don't have to.
+           You can find the entire <a href='https://github.com/rewardhacker'>source code here</a>.
           </p>
         </div>
       </div>
@@ -85,6 +117,7 @@ import generateZazzleLink from './lib/getZazzleLink.js';
 import appState from './lib/appState.js';
 import {getPrintableCanvas, getCanvas} from './lib/saveFile.js';
 import config from './config.js';
+import palettes from './palettes.js';
 import './lib/canvas2BlobPolyfill.js';
 import bus from './lib/bus.js';
 import createOverlayManager from './createOverlayManager.js';
@@ -116,7 +149,11 @@ export default {
       settingsOpen: false,
       labelColor: config.getLabelColor().toRgb(),
       backgroundColor: config.getBackgroundColor().toRgb(),
-      layers: []
+      layers: [],
+      palettes,
+      animateRoads: localStorage.getItem('animateRoads') !== 'false',
+      animationSpeed: Number.parseInt(localStorage.getItem('animationSpeed'), 10) || 1200,
+      revealOrder: localStorage.getItem('revealOrder') || 'original'
     }
   },
   computed: {
@@ -174,8 +211,17 @@ export default {
 
       let gridLayer = new GridLayer();
       gridLayer.id = 'lines';
+      gridLayer.animated = this.animateRoads;
+      gridLayer.animationDuration = this.animationSpeed;
+      gridLayer.revealOrder = this.revealOrder;
       gridLayer.setGrid(grid);
       this.scene.add(gridLayer)
+    },
+
+    saveAnimationPrefs() {
+      localStorage.setItem('animateRoads', this.animateRoads);
+      localStorage.setItem('animationSpeed', this.animationSpeed);
+      localStorage.setItem('revealOrder', this.revealOrder);
     },
 
     startOver() {
@@ -255,6 +301,17 @@ export default {
       this.scene.background = c;
       document.body.style.backgroundColor = toRGBA(c);
       this.zazzleLink = null;
+    },
+
+    applyPalette(p) {
+      this.backgroundColor = tinycolor(p.background).toRgb();
+      this.updateBackground();
+      this.labelColor = tinycolor(p.label).toRgb();
+      let lineColor = tinycolor(p.line).toRgb();
+      this.layers.forEach(layer => {
+        if (layer.name === 'background' || layer.name === 'labels') return;
+        layer.changeColor(lineColor);
+      });
     },
 
     zazzleMugPrint() {
@@ -375,6 +432,31 @@ function recordOpenClick(link) {
   display: flex;
   flex-direction: row;
   min-height: 32px;
+}
+.palettes {
+  flex-wrap: wrap;
+  .palette-swatch {
+    width: 28px;
+    height: 28px;
+    margin: 2px;
+    border: 2px solid;
+    border-radius: 4px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding: 3px;
+    box-sizing: border-box;
+    span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+  }
+}
+.duration-label {
+  margin-left: 8px;
+  font-size: 12px;
+  color: secondary-color;
 }
 .colors {
   display: flex;

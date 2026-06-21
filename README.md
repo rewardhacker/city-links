@@ -1,4 +1,4 @@
-# city-roads
+# city-links
 
 Render every single road in any city at once: https://anvaka.github.io/city-roads/
 
@@ -20,8 +20,8 @@ and fallback to overpass if area is not present in cache.
 ## Scripting
 
 Behind simple UI software engineers would also find scripting capabilities. You can develop programs on top
-of the city-roads. A few examples are available in [city-script](https://github.com/anvaka/city-script). Scene
-API is documented here: https://github.com/anvaka/city-roads/blob/main/API.md
+of the city-links. A few examples are available in [city-script](https://github.com/anvaka/city-script). Scene
+API is documented here: https://github.com/rewardhacker/city-links/blob/main/API.md
 
 Please share your creations and do not hesitate to reach out if you have any questions.
 

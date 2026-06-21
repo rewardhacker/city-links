@@ -1,7 +1,7 @@
 <template>
 <div class='find-place' :class='{centered: boxInTheMiddle }'>
   <div v-if='boxInTheMiddle'>
-    <h3 class='site-header'>city roads</h3>
+    <h3 class='site-header'>city links</h3>
     <p class='description'>This website renders every single road within a city</p>
   </div>
   <form v-on:submit.prevent="onSubmit" class='search-box'>
@@ -50,7 +50,7 @@
         <a href='#' @click.prevent="retry" class='retry-btn'>Retry</a>
       </div>
       <div class='error-links'>
-        <a href='https://twitter.com/anvaka/status/1218971717734789120' title='see what it supposed to do' target="_blank">see how it should have worked</a>
+        <a href='https://instagram.com/localponders' title='see what it supposed to do' target="_blank">see how it should have worked</a>
         <a :href='getBugReportURL(error)' :title='"report error: " + error' target='_blank'>report this bug</a>
       </div>
     </div>
@@ -181,7 +181,7 @@ export default {
           error.toString() + '\n```\n\n Can you please help?';
       }
 
-      return `https://github.com/anvaka/city-roads/issues/new?title=${title}&body=${encodeURIComponent(body)}`
+      return `https://github.com/rewardhacker/city-roads/issues/new?title=${title}&body=${encodeURIComponent(body)}`
     },
 
     updateProgress(status) {
@@ -373,7 +373,7 @@ h3.site-header {
 input {
   border: none;
   flex: 1;
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: 'Lora', Georgia, serif;
   padding: 0;
   color: #434343;
   height: 100%;

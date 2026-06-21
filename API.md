@@ -2,7 +2,7 @@
 
 *This is work in progress and subject to change. Please don't rely on it for anything critical* 
 
-The `city-roads` provides additional set of operations for the software engineers, allowing them
+The `city-links` provides additional set of operations for the software engineers, allowing them
 to execute arbitrary OpenStreetMap queries and visualize results.
 
 ## Methods

@@ -42,6 +42,9 @@ export default class GridLayer {
     this.hidden = false;
     this.id = 'paths_' + counter;
     this._lineWidth = 1;
+    this.animated = true;
+    this.animationDuration = 1200;
+    this.revealOrder = 'original';
     counter += 1;
   }
 
@@ -98,22 +101,69 @@ export default class GridLayer {
     if (this.lines) return this.lines;
 
     let grid = this.grid;
-    let lines = new WireCollection(grid.wayPointCount, {
+    let ways = [];
+    grid.forEachWay(function(from, to) {
+      ways.push({from, to});
+    });
+    ways = orderWays(ways, this.revealOrder);
+
+    let lines = new WireCollection(ways.length || 1, {
       width: this._lineWidth,
       allowColors: false,
       is3D: false
-    });
-    grid.forEachWay(function(from, to) {
-      lines.add({from, to});
     });
     let color = tinycolor(this._color).toRgb();
     lines.color = toRatioColor(color);
     lines.id = this.id;
 
     this.lines = lines;
+    this._ways = ways;
+  }
+
+  // Draws every road at once (the "all at once" feature).
+  revealAll() {
+    let ways = this._ways;
+    let lines = this.lines;
+    if (!ways || !lines) return;
+
+    while (lines.count < ways.length) {
+      lines.add(ways[lines.count]);
+    }
+    lines.isDirtyBuffer = true;
+    if (this.scene) this.scene.renderFrame();
+  }
+
+  // Reveals roads progressively instead of all at once, so the city looks
+  // like it's being drawn/connected together in the chosen palette color.
+  // `duration` (ms) lets the user calibrate how fast they connect.
+  animateReveal(duration = this.animationDuration) {
+    let ways = this._ways;
+    let lines = this.lines;
+    if (!ways || !ways.length || !lines) return;
+
+    let start = performance.now();
+
+    let step = () => {
+      if (this._disposed || this.lines !== lines) return;
+
+      let t = Math.min(1, (performance.now() - start) / duration);
+      let eased = 1 - Math.pow(1 - t, 3);
+      let targetCount = Math.round(ways.length * eased);
+
+      while (lines.count < targetCount) {
+        lines.add(ways[lines.count]);
+      }
+      lines.isDirtyBuffer = true;
+      if (this.scene) this.scene.renderFrame();
+
+      if (t < 1) requestAnimationFrame(step);
+    };
+
+    requestAnimationFrame(step);
   }
 
   destroy() {
+    this._disposed = true;
     if (!this.scene || !this.lines) return;
 
     // TODO: This should remove the grid layer too. Need to clean up how
@@ -133,6 +183,11 @@ export default class GridLayer {
 
     if (this.hidden) return;
     this.scene.appendChild(this.lines);
+    if (this.animated) {
+      this.animateReveal();
+    } else {
+      this.revealAll();
+    }
   }
 
   hide() {
@@ -167,4 +222,31 @@ export default class GridLayer {
 
 function toRatioColor(c) {
   return {r: c.r/0xff, g: c.g/0xff, b: c.b/0xff, a: c.a}
+}
+
+function orderWays(ways, order) {
+  if (order === 'random') {
+    let shuffled = ways.slice();
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      let j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }
+
+  if (order === 'center-out' || order === 'outside-in') {
+    let cx = 0, cy = 0;
+    ways.forEach(w => { cx += w.from.x; cy += w.from.y; });
+    cx /= ways.length || 1;
+    cy /= ways.length || 1;
+
+    let sorted = ways.slice().sort((a, b) => {
+      let da = (a.from.x - cx) ** 2 + (a.from.y - cy) ** 2;
+      let db = (b.from.x - cx) ** 2 + (b.from.y - cy) ** 2;
+      return order === 'center-out' ? da - db : db - da;
+    });
+    return sorted;
+  }
+
+  return ways; // 'original' - the order roads came from OSM
 }
