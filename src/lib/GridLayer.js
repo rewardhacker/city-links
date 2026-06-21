@@ -45,6 +45,7 @@ export default class GridLayer {
     this.animated = true;
     this.animationDuration = 1200;
     this.revealOrder = 'original';
+    this.loopAnimation = false;
     counter += 1;
   }
 
@@ -159,8 +160,19 @@ export default class GridLayer {
       lines.isDirtyBuffer = true;
       if (this.scene) this.scene.renderFrame();
 
-      if (t < 1) requestAnimationFrame(step);
-      else if (onComplete) onComplete();
+      if (t < 1) {
+        requestAnimationFrame(step);
+        return;
+      }
+
+      if (onComplete) onComplete();
+      if (this.loopAnimation && !this._disposed) {
+        this._ways = orderWays(ways, this.revealOrder);
+        lines.count = 0;
+        lines.isDirtyBuffer = true;
+        if (this.scene) this.scene.renderFrame();
+        this.animateReveal(duration);
+      }
     };
 
     requestAnimationFrame(step);
@@ -271,5 +283,100 @@ function orderWays(ways, order) {
     return sorted;
   }
 
+  if (order === 'bfs' || order === 'dfs') {
+    return traverseWays(ways, order === 'dfs');
+  }
+
+  if (order === 'spiral') {
+    return spiralWays(ways);
+  }
+
   return ways; // 'original' - the order roads came from OSM
+}
+
+// Walks the road network like a graph: two segments are "connected" when
+// they share an endpoint. Visits every connected component (a city can have
+// disjoint islands of roads) so nothing is left undrawn.
+function traverseWays(ways, useStack) {
+  let adjacency = buildWayAdjacency(ways);
+  let visited = new Uint8Array(ways.length);
+  let order = [];
+
+  for (let start = 0; start < ways.length; start++) {
+    if (visited[start]) continue;
+    visited[start] = 1;
+    let frontier = [start];
+
+    if (useStack) {
+      while (frontier.length) {
+        let i = frontier.pop();
+        order.push(ways[i]);
+        adjacency[i].forEach(n => {
+          if (!visited[n]) { visited[n] = 1; frontier.push(n); }
+        });
+      }
+    } else {
+      let head = 0;
+      while (head < frontier.length) {
+        let i = frontier[head++];
+        order.push(ways[i]);
+        adjacency[i].forEach(n => {
+          if (!visited[n]) { visited[n] = 1; frontier.push(n); }
+        });
+      }
+    }
+  }
+
+  return order;
+}
+
+// ponytail: adjacency is "shares an endpoint", not real street topology
+// (no merging of collinear segments). Good enough for a reveal-order
+// effect; build a proper road graph if this needs to drive real routing.
+function buildWayAdjacency(ways) {
+  let pointToWays = new Map();
+  let key = p => p.x + ',' + p.y;
+
+  ways.forEach((w, i) => {
+    addPoint(w.from, i);
+    addPoint(w.to, i);
+  });
+
+  return ways.map(w => {
+    let neighbors = new Set();
+    pointToWays.get(key(w.from)).forEach(n => neighbors.add(n));
+    pointToWays.get(key(w.to)).forEach(n => neighbors.add(n));
+    return neighbors;
+  });
+
+  function addPoint(p, i) {
+    let k = key(p);
+    let arr = pointToWays.get(k);
+    if (!arr) { arr = []; pointToWays.set(k, arr); }
+    arr.push(i);
+  }
+}
+
+// Concentric rings around the centroid, each ring revealed in angular order -
+// roads "spiral" outward from the middle of the city.
+function spiralWays(ways) {
+  let cx = 0, cy = 0;
+  ways.forEach(w => { cx += w.from.x; cy += w.from.y; });
+  cx /= ways.length || 1;
+  cy /= ways.length || 1;
+
+  const RINGS = 24;
+  let maxDist = 0;
+  let scored = ways.map(w => {
+    let dx = w.from.x - cx, dy = w.from.y - cy;
+    let dist = Math.sqrt(dx * dx + dy * dy);
+    let angle = Math.atan2(dy, dx);
+    if (angle < 0) angle += Math.PI * 2;
+    maxDist = Math.max(maxDist, dist);
+    return {w, dist, angle};
+  });
+
+  scored.forEach(s => { s.ring = maxDist ? Math.floor((s.dist / maxDist) * RINGS) : 0; });
+  scored.sort((a, b) => (a.ring - b.ring) || (a.angle - b.angle));
+  return scored.map(s => s.w);
 }

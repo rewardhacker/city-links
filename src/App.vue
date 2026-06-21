@@ -34,8 +34,9 @@
         </div>
         <div class='row' v-if='animateRoads'>
           <label class='col' for='connect-time'>Connect time</label>
-          <div class='col c-2'>
-            <input id='connect-time' type='range' min='300' max='3000' step='100' v-model.number='animationSpeed' @change='saveAnimationPrefs'>
+          <div class='col c-2 duration-control'>
+            <input id='connect-time' type='range' min='300' max='10000' step='100' v-model.number='animationSpeed' @change='saveAnimationPrefs'>
+            <input type='number' min='100' step='100' class='duration-input' v-model.number='animationSpeed' @change='saveAnimationPrefs'>
             <span class='duration-label'>{{(animationSpeed/1000).toFixed(1)}}s</span>
           </div>
         </div>
@@ -47,7 +48,19 @@
               <option value='center-out'>Center out</option>
               <option value='outside-in'>Outside in</option>
               <option value='random'>Random</option>
+              <option value='bfs'>Breadth-first</option>
+              <option value='dfs'>Depth-first</option>
+              <option value='spiral'>Spiral</option>
             </select>
+          </div>
+        </div>
+        <div class='row' v-if='animateRoads'>
+          <label class='col' for='loop-animation'>Loop animation</label>
+          <div class='col c-2'>
+            <div class='checkbox-wrapper-9'>
+              <input class='tgl tgl-flat' id='loop-animation' type='checkbox' v-model='loopAnimation' @change='saveAnimationPrefs'>
+              <label class='tgl-btn' for='loop-animation'></label>
+            </div>
           </div>
         </div>
         <div class='row'>
@@ -180,6 +193,7 @@ export default {
         : !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
       animationSpeed: Number.parseInt(localStorage.getItem('animationSpeed'), 10) || 1200,
       revealOrder: localStorage.getItem('revealOrder') || 'original',
+      loopAnimation: localStorage.getItem('loopAnimation') === 'true',
       exportingAnimation: false
     }
   },
@@ -242,6 +256,7 @@ export default {
       gridLayer.animated = this.animateRoads;
       gridLayer.animationDuration = this.animationSpeed;
       gridLayer.revealOrder = this.revealOrder;
+      gridLayer.loopAnimation = this.loopAnimation;
       gridLayer.setGrid(grid);
       this.scene.add(gridLayer)
       this.gridLayer = gridLayer;
@@ -251,6 +266,8 @@ export default {
       localStorage.setItem('animateRoads', this.animateRoads);
       localStorage.setItem('animationSpeed', this.animationSpeed);
       localStorage.setItem('revealOrder', this.revealOrder);
+      localStorage.setItem('loopAnimation', this.loopAnimation);
+      if (this.gridLayer) this.gridLayer.loopAnimation = this.loopAnimation;
     },
 
     replayAnimation() {
@@ -258,6 +275,7 @@ export default {
       this.gridLayer.animated = this.animateRoads;
       this.gridLayer.animationDuration = this.animationSpeed;
       this.gridLayer.revealOrder = this.revealOrder;
+      this.gridLayer.loopAnimation = this.loopAnimation;
       this.gridLayer.replay();
     },
 
@@ -533,11 +551,31 @@ function recordOpenClick(link) {
     justify-content: flex-end;
     padding: 3px;
     box-sizing: border-box;
-    border-radius: 0;
+    border-radius: 8px;
     span {
       width: 8px;
       height: 8px;
+      border-radius: 3px;
     }
+  }
+}
+.duration-control {
+  align-items: center;
+}
+.duration-input {
+  width: 64px;
+  margin-left: 8px;
+  padding: 2px 6px;
+  background: emphasis-background;
+  border: 1px solid border-color;
+  border-radius: 8px;
+  color: primary-text;
+  font-size: 12px;
+  -webkit-appearance: none;
+  appearance: none;
+  &:focus {
+    outline: 2px solid highlight-color;
+    outline-offset: 1px;
   }
 }
 .duration-label {
@@ -586,6 +624,7 @@ a:focus {
   -webkit-backdrop-filter: blur(16px);
   width: desktop-controls-width;
   padding: 8px;
+  border-radius: squircle;
   .row a {
     margin-right: 4px;
   }

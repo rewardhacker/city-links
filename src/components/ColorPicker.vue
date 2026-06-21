@@ -139,6 +139,7 @@ export default {
     height: 22px;
     border: 1px solid rgba(232,228,223,.4);
     background: #060608;
+    border-radius: 6px;
   }
 
   .vue-colorpicker-panel {

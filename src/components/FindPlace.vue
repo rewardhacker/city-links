@@ -399,6 +399,8 @@ input {
   display: flex;
   font-size: 16px;
   cursor: text;
+  border-radius: squircle;
+  overflow: hidden;
   a {
     cursor: pointer;
   }
@@ -456,6 +458,8 @@ input {
 .suggestions {
   position: relative;
   background: emphasis-background
+  border-radius: squircle;
+  overflow: hidden;
   .note {
     font-size: 10px;
     font-style: italic;
@@ -484,6 +488,8 @@ input {
 
 .shadow {
   border: 0.5px solid border-color;
+  border-radius: squircle;
+  overflow: hidden;
 }
 
 .error {
@@ -536,6 +542,7 @@ input {
   display: inline-block;
   padding: 8px 24px;
   border: 0.5px solid border-color;
+  border-radius: squircle;
   color: primary-text;
   text-decoration: none;
   text-transform: uppercase;
