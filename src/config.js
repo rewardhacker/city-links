@@ -11,13 +11,13 @@ export default {
   areaServer: 'https://d2uf7yjjctyxf.cloudfront.net/nov-02-2020',
 
   getDefaultLineColor() {
-    return tinycolor('rgba(26, 26, 26, 0.8)');
+    return tinycolor('rgba(232, 228, 223, 0.85)');
   },
   getLabelColor() {
-    return tinycolor('#161616');
+    return tinycolor('#e8e4df');
   },
 
   getBackgroundColor() {
-    return tinycolor('#F7F2E8');
+    return tinycolor('#060608');
   }
 }

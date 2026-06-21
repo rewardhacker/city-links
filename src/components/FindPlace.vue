@@ -515,6 +515,7 @@ input {
   padding: 8px;
   margin: 0;
   text-align: center;
+  color: secondary-color;
 }
 
 .cancel-request {
