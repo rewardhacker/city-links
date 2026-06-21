@@ -136,10 +136,13 @@ export default class GridLayer {
   // Reveals roads progressively instead of all at once, so the city looks
   // like it's being drawn/connected together in the chosen palette color.
   // `duration` (ms) lets the user calibrate how fast they connect.
-  animateReveal(duration = this.animationDuration) {
+  animateReveal(duration = this.animationDuration, onComplete) {
     let ways = this._ways;
     let lines = this.lines;
-    if (!ways || !ways.length || !lines) return;
+    if (!ways || !ways.length || !lines) {
+      if (onComplete) onComplete();
+      return;
+    }
 
     let start = performance.now();
 
@@ -157,9 +160,29 @@ export default class GridLayer {
       if (this.scene) this.scene.renderFrame();
 
       if (t < 1) requestAnimationFrame(step);
+      else if (onComplete) onComplete();
     };
 
     requestAnimationFrame(step);
+  }
+
+  // Re-runs the reveal from scratch with whatever settings are current,
+  // so changing speed/order/animate-toggle can be previewed without
+  // re-loading the city. Also used to drive the animation export.
+  replay({animated = this.animated, duration = this.animationDuration, onComplete} = {}) {
+    if (!this.lines || !this._ways) return;
+
+    this._ways = orderWays(this._ways, this.revealOrder);
+    this.lines.count = 0;
+    this.lines.isDirtyBuffer = true;
+    if (this.scene) this.scene.renderFrame();
+
+    if (animated) {
+      this.animateReveal(duration, onComplete);
+    } else {
+      this.revealAll();
+      if (onComplete) onComplete();
+    }
   }
 
   destroy() {

@@ -2,9 +2,16 @@
   <find-place v-if='!placeFound' @loaded='onGridLoaded'></find-place>
   <div id="app">
     <div v-if='placeFound'>
-      <div class='controls'>
-        <a href="#" class='print-button' @click.prevent='toggleSettings'>Customize...</a>
-        <a href="#" class='try-another' @click.prevent='startOver'>Try another city</a>
+      <div class='site-nav'>
+        <a href='#' class='nav-brand' @click.prevent='startOver'>
+          <span class='nav-name'>city links</span>
+        </a>
+        <div class='nav-links'>
+          <div class='nav-item' :class='{"sub-open": showSettings}'>
+            <a href="#" class='print-button' :class='{active: showSettings}' @click.prevent='toggleSettings'>Customize</a>
+          </div>
+          <a href="#" class='try-another' @click.prevent='startOver'>Try another city</a>
+        </div>
       </div>
       <div v-if='showSettings' class='print-window'>
         <h3>Palettes</h3>
@@ -39,6 +46,12 @@
               <option value='random'>Random</option>
             </select>
           </div>
+        </div>
+        <div class='row'>
+          <a href='#' @click.prevent='replayAnimation' class='col'>Replay</a>
+          <span class='col c-2'>
+            Re-run the reveal with the current settings on this city.
+          </span>
         </div>
 
         <h3>Display</h3>
@@ -77,9 +90,15 @@
         </div>
         
         <div class='row'>
-          <a href='#'  @click.prevent='toSVGFile' class='col'>As a vector (.svg)</a> 
+          <a href='#'  @click.prevent='toSVGFile' class='col'>As a vector (.svg)</a>
           <span class='col c-2'>
             Save the current screen as a vector image.
+          </span>
+        </div>
+        <div class='row'>
+          <a href='#' @click.prevent='exportAnimation' class='col'>{{exportingAnimation ? 'Recording...' : 'As a video (.webm)'}}</a>
+          <span class='col c-2'>
+            Record the reveal animation and save it as a video.
           </span>
         </div>
         <div v-if='false' class='row'>
@@ -102,8 +121,10 @@
     </div>
   </div>
 
-  <editable-label v-if='placeFound' v-model='name' class='city-name' :printable='true' :style='{color: labelColorRGBA}' :overlay-manager='overlayManager'></editable-label>
-  <div v-if='placeFound' class='license printable can-drag' :style='{color: labelColorRGBA}'>data <a href='https://www.openstreetmap.org/about/' target="_blank" :style='{color: labelColorRGBA}'>© OpenStreetMap</a></div>
+  <div v-if='placeFound' class='bottom-bar'>
+    <div class='license printable can-drag' :style='{color: labelColorRGBA}'>data <a href='https://www.openstreetmap.org/about/' target="_blank" :style='{color: labelColorRGBA}'>© OpenStreetMap</a></div>
+    <editable-label v-model='name' class='city-name' :printable='true' :style='{color: labelColorRGBA}' :overlay-manager='overlayManager'></editable-label>
+  </div>
 </template>
 
 <script>
@@ -153,7 +174,8 @@ export default {
       palettes,
       animateRoads: localStorage.getItem('animateRoads') !== 'false',
       animationSpeed: Number.parseInt(localStorage.getItem('animationSpeed'), 10) || 1200,
-      revealOrder: localStorage.getItem('revealOrder') || 'original'
+      revealOrder: localStorage.getItem('revealOrder') || 'original',
+      exportingAnimation: false
     }
   },
   computed: {
@@ -181,6 +203,7 @@ export default {
         this.scene.dispose();
         window.scene = null;
       }
+      this.gridLayer = null;
     },
     toggleSettings() {
       this.showSettings = !this.showSettings;
@@ -216,12 +239,54 @@ export default {
       gridLayer.revealOrder = this.revealOrder;
       gridLayer.setGrid(grid);
       this.scene.add(gridLayer)
+      this.gridLayer = gridLayer;
     },
 
     saveAnimationPrefs() {
       localStorage.setItem('animateRoads', this.animateRoads);
       localStorage.setItem('animationSpeed', this.animationSpeed);
       localStorage.setItem('revealOrder', this.revealOrder);
+    },
+
+    replayAnimation() {
+      if (!this.gridLayer) return;
+      this.gridLayer.animated = this.animateRoads;
+      this.gridLayer.animationDuration = this.animationSpeed;
+      this.gridLayer.revealOrder = this.revealOrder;
+      this.gridLayer.replay();
+    },
+
+    exportAnimation() {
+      if (!this.gridLayer || this.exportingAnimation) return;
+      let canvas = getCanvas();
+      if (!canvas.captureStream || typeof MediaRecorder === 'undefined') {
+        this.error = new Error('Your browser does not support recording video.');
+        return;
+      }
+
+      this.exportingAnimation = true;
+      let stream = canvas.captureStream(30);
+      let recorder = new MediaRecorder(stream, {mimeType: 'video/webm'});
+      let chunks = [];
+      recorder.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+      recorder.onstop = () => {
+        let blob = new Blob(chunks, {type: 'video/webm'});
+        let url = window.URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = (this.name || 'city-links') + '.webm';
+        a.click();
+        setTimeout(() => window.URL.revokeObjectURL(url), 45000);
+        this.exportingAnimation = false;
+      };
+
+      recorder.start();
+      this.gridLayer.replay({
+        animated: true,
+        duration: this.animationSpeed,
+        // small buffer after the reveal finishes so the final frame is captured
+        onComplete: () => setTimeout(() => recorder.stop(), 300)
+      });
     },
 
     startOver() {
@@ -384,21 +449,38 @@ function recordOpenClick(link) {
   border-style: solid;
 }
 
-.controls {
-  height: 48px;
-  background: emphasis-background;
+.site-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
   display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  width: desktop-controls-width;
-  justify-content: space-around;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 36px 14px;
+  background: emphasis-background;
   border-bottom: 0.5px solid border-color;
+}
+.nav-brand {
+  text-decoration: none;
+  border: 0;
+  margin: 0;
+}
+.nav-name {
+  font-weight: 400;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: primary-text;
+}
+.nav-links {
+  display: flex;
+  gap: 28px;
+  align-items: center;
 
   a {
     text-decoration: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     text-transform: uppercase;
     font-size: 11px;
     letter-spacing: 0.16em;
@@ -409,18 +491,16 @@ function recordOpenClick(link) {
     &:hover {
       color: highlight-color;
     }
-  }
-  a.try-another {
-    flex: 1;
-  }
-
-  a.print-button {
-    flex: 1;
-    border-right: 0.5px solid border-color;
-    &:focus {
-      border: 1px dashed highlight-color;
+    &.active {
+      color: highlight-color;
+      font-weight: 700;
     }
   }
+}
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .col {
@@ -488,10 +568,16 @@ a:focus {
   outline: none;
 }
 .print-window {
-  max-height: calc(100vh - 48px);
+  position: fixed;
+  top: 64px;
+  right: 36px;
+  z-index: 20;
+  max-height: calc(100vh - 96px);
   overflow-y: auto;
-  border-top: 0.5px solid border-color;
-  background: emphasis-background;
+  border: 0.5px solid border-color;
+  background: rgba(7,7,15,0.97);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   width: desktop-controls-width;
   padding: 8px;
   .row a {
@@ -532,12 +618,24 @@ a:focus {
   }
 }
 
+.bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 15;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 12px 36px;
+  border-top: 0.5px solid border-color;
+  pointer-events: none;
+}
+
 .city-name {
-  position: absolute;
-  right: 32px;
-  bottom: 54px;
   font-size: 24px;
   color: primary-text;
+  pointer-events: auto;
   input {
     font-size: 24px;
   }
@@ -545,12 +643,9 @@ a:focus {
 
 .license {
   text-align: right;
-  position: fixed;
   font-family: labels-font;
-  right: 32px;
-  bottom: 32px;
   font-size: 12px;
-  padding-right: 8px;
+  pointer-events: auto;
   a {
     text-decoration: none;
     display: inline-block;
@@ -567,7 +662,7 @@ a:focus {
     margin: 0;
 
     .preview-actions,.error,
-    .controls, .print-window {
+    .print-window {
       width: 100%;
     }
     .loading-container {
@@ -579,13 +674,27 @@ a:focus {
     }
 
   }
-  .city-name  {
-    right: 8px;
-    bottom: 24px;
+  .site-nav {
+    padding: 14px 20px 12px;
   }
-  .license  {
-    right: 8px;
-    bottom: 8px;
+  .nav-links {
+    gap: 16px;
+  }
+  .print-window {
+    top: 56px;
+    right: 0;
+  }
+  .bottom-bar {
+    padding: 8px 12px;
+  }
+  .city-name {
+    font-size: 18px;
+    input {
+      font-size: 18px;
+    }
+  }
+  .license {
+    font-size: 10px;
   }
 }
 
