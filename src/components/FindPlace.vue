@@ -365,17 +365,21 @@ function parseBBox(bboxStr) {
 
 h3.site-header {
   margin: 0;
-  font-weight: normal;
+  font-weight: 300;
   font-size: 32px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: primary-text;
   text-align: center;
 }
 
 input {
   border: none;
   flex: 1;
+  background: transparent;
   font-family: 'Lora', Georgia, serif;
   padding: 0;
-  color: #434343;
+  color: primary-text;
   height: 100%;
   font-size: 16px;
   &:focus {
@@ -389,7 +393,7 @@ input {
   padding: 0 8px;
   padding: 0 0 0 8px;
 
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2), 0 -1px 0px rgba(0,0,0,0.02);
+  border-bottom: 0.5px solid border-color;
   height: 48px;
   display: flex;
   font-size: 16px;
@@ -419,10 +423,13 @@ input {
   justify-content: center;
   outline: none;
   z-index: 1;
-  color: highlight-color
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 13px;
+  color: secondary-color;
+  transition: color 0.2s ease;
   &:hover {
-    color: emphasis-background;
-    background: highlight-color;
+    color: highlight-color;
   }
 }
 
@@ -430,19 +437,24 @@ input {
   display: block
   min-height: 64px
   align-items: center;
-  border-bottom: 1px solid border-color
+  border-bottom: 0.5px solid border-color
   display: flex
   padding: 0 10px;
   text-decoration: none
-  color: highlight-color
+  color: secondary-color
+  transition: color 0.2s ease;
+  &:hover {
+    color: highlight-color;
+  }
 }
 
 .suggestions {
   position: relative;
-  background: white
+  background: emphasis-background
   .note {
     font-size: 10px;
     font-style: italic;
+    color: secondary-color;
   }
 
   ul {
@@ -465,7 +477,7 @@ input {
 }
 
 .shadow {
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2)
+  border: 0.5px solid border-color;
 }
 
 .error {
@@ -507,7 +519,7 @@ input {
 }
 .error-note {
   font-size: 12px;
-  color: #666;
+  color: secondary-color;
   margin: 8px 0;
 }
 .error-actions {
@@ -516,13 +528,15 @@ input {
 .retry-btn {
   display: inline-block;
   padding: 8px 24px;
-  background: highlight-color;
-  color: white;
+  border: 0.5px solid border-color;
+  color: primary-text;
   text-decoration: none;
-  border-radius: 4px;
-  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 12px;
+  transition: border-color 0.2s ease;
   &:hover {
-    opacity: 0.9;
+    border-color: primary-text;
   }
 }
 .error-links {

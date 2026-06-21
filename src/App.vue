@@ -386,25 +386,28 @@ function recordOpenClick(link) {
 
 .controls {
   height: 48px;
-  background: white;
+  background: emphasis-background;
   display: flex;
   flex-direction: row;
   align-items: stretch;
   width: desktop-controls-width;
   justify-content: space-around;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2), 0 -1px 0px rgba(0,0,0,0.02);
+  border-bottom: 0.5px solid border-color;
 
   a {
     text-decoration: none;
     display: flex;
     justify-content: center;
     align-items: center;
-    color: highlight-color;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: secondary-color;
     margin: 0;
     border: 0;
+    transition: color 0.2s ease;
     &:hover {
-      color: emphasis-background;
-      background: highlight-color;
+      color: highlight-color;
     }
   }
   a.try-another {
@@ -413,7 +416,7 @@ function recordOpenClick(link) {
 
   a.print-button {
     flex: 1;
-    border-right: 1px solid border-color;
+    border-right: 0.5px solid border-color;
     &:focus {
       border: 1px dashed highlight-color;
     }
@@ -440,16 +443,15 @@ function recordOpenClick(link) {
     height: 28px;
     margin: 2px;
     border: 2px solid;
-    border-radius: 4px;
     display: flex;
     align-items: flex-end;
     justify-content: flex-end;
     padding: 3px;
     box-sizing: border-box;
+    border-radius: 0;
     span {
       width: 8px;
       height: 8px;
-      border-radius: 50%;
     }
   }
 }
@@ -488,9 +490,8 @@ a:focus {
 .print-window {
   max-height: calc(100vh - 48px);
   overflow-y: auto;
-  border-top: 1px solid border-color;
-  background: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  border-top: 0.5px solid border-color;
+  background: emphasis-background;
   width: desktop-controls-width;
   padding: 8px;
   .row a {
@@ -500,13 +501,17 @@ a:focus {
   h3 {
     margin: 8px 0;
     text-align: right;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: secondary-color;
   }
 }
 
 .message {
-  border-top: 1px solid border-color
-  border-bottom: 1px solid border-color
-  background: #F5F5F5;
+  border-top: 0.5px solid border-color
+  border-bottom: 0.5px solid border-color
+  background: rgba(232,228,223,0.05);
 }
 
 .preview-actions {
@@ -532,7 +537,7 @@ a:focus {
   right: 32px;
   bottom: 54px;
   font-size: 24px;
-  color: #434343;
+  color: primary-text;
   input {
     font-size: 24px;
   }

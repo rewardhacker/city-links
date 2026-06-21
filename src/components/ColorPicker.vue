@@ -133,8 +133,8 @@ export default {
     display: inline-block;
     width: 30px;
     height: 22px;
-    border: 1px solid #666;
-    background: #FFFFFF;
+    border: 1px solid rgba(232,228,223,.4);
+    background: #060608;
   }
 
   .vue-colorpicker-panel {
