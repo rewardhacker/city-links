@@ -130,15 +130,15 @@ export default {
   font-size: 0;
   cursor: pointer;
   &:focus {
-    outline: 2px solid #e8e4df;
+    outline: 2px solid #A1887F;
     outline-offset: 2px;
   }
   &-btn {
     display: inline-block;
     width: 30px;
     height: 22px;
-    border: 1px solid rgba(232,228,223,.4);
-    background: #060608;
+    border: 1px solid rgba(70,66,59,.4);
+    background: #DCD5C9;
     border-radius: 6px;
   }
 

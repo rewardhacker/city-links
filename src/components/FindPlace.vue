@@ -365,8 +365,9 @@ function parseBBox(bboxStr) {
 
 h3.site-header {
   margin: 0;
-  font-weight: 300;
-  font-size: 32px;
+  font-family: headline-font;
+  font-weight: 400;
+  font-size: 36px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: primary-text;

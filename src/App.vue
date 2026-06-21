@@ -83,22 +83,6 @@
 
         <h3>Export</h3>
         <div class='row'>
-          <a href='#' @click.prevent='zazzleMugPrint()' class='col'>Onto a mug</a> 
-          <span class='col c-2'>
-            Print what you see onto a mug. <br/>Get a unique gift of your favorite city.
-          </span>
-        </div>
-        <div class='preview-actions message' v-if='zazzleLink || generatingPreview'>
-            <div v-if='zazzleLink' class='padded popup-help'>
-              If your browser has blocked the new window, <br/>please <a :href='zazzleLink' target='_blank'>click here</a>
-              to open it.
-            </div>
-            <div v-if='generatingPreview' class='loading-container'>
-              <loading-icon></loading-icon>
-              Generating preview url...
-            </div>
-        </div>
-        <div class='row'>
           <a href='#'  @click.prevent='toPNGFile' class='col'>As an image (.png)</a> 
           <span class='col c-2'>
             Save the current screen as a raster image.
@@ -126,12 +110,7 @@
 
         <h3>About</h3>
         <div>
-          <p>This website was created by <a href='https://instagram.com/localponders' target='_blank'>@localponders</a>.
-          It downloads roads from OpenStreetMap and renders them with WebGL. Visit <a href='https://jakadin.com' target='_blank'>jakadin.com</a> for more.
-          </p>
-          <p>
-           You can find the entire <a href='https://github.com/rewardhacker'>source code here</a>.
-          </p>
+          <p>Made by <a href='https://www.instagram.com/localponders' target='_blank'>@localponders</a></p>
         </div>
       </div>
     </div>
@@ -145,14 +124,12 @@
 
 <script>
 import FindPlace from './components/FindPlace.vue';
-import LoadingIcon from './components/LoadingIcon.vue';
 import EditableLabel from './components/EditableLabel.vue';
 import ColorPicker from './components/ColorPicker.vue';
 import createScene from './lib/createScene.js';
 import GridLayer from './lib/GridLayer.js';
-import generateZazzleLink from './lib/getZazzleLink.js';
 import appState from './lib/appState.js';
-import {getPrintableCanvas, getCanvas} from './lib/saveFile.js';
+import {getCanvas} from './lib/saveFile.js';
 import config from './config.js';
 import palettes from './palettes.js';
 import './lib/canvas2BlobPolyfill.js';
@@ -172,7 +149,6 @@ export default {
   name: 'App',
   components: {
     FindPlace,
-    LoadingIcon,
     EditableLabel,
     ColorPicker
   },
@@ -180,8 +156,6 @@ export default {
     return {
       placeFound: false,
       name: '',
-      zazzleLink: null,
-      generatingPreview: false,
       showSettings: false,
       settingsOpen: false,
       labelColor: config.getLabelColor().toRgb(),
@@ -203,7 +177,6 @@ export default {
     }
   },
   created() {
-    bus.on('scene-transform', this.handleSceneTransform);
     bus.on('background-color', this.syncBackground);
     bus.on('line-color', this.syncLineColor);
     this.overlayManager = createOverlayManager();
@@ -212,7 +185,6 @@ export default {
     debugger;
     this.overlayManager.dispose();
     this.dispose();
-    bus.off('scene-transform', this.handleSceneTransform);
     bus.off('background-color', this.syncBackground);
     bus.off('line-color', this.syncLineColor);
   },
@@ -226,9 +198,6 @@ export default {
     },
     toggleSettings() {
       this.showSettings = !this.showSettings;
-    },
-    handleSceneTransform() {
-      this.zazzleLink = null;
     },
     onGridLoaded(grid) {
       if (grid.isArea) {
@@ -320,7 +289,6 @@ export default {
 
       this.dispose();
       this.placeFound = false;
-      this.zazzleLink = null;
       this.showSettings = false;
       this.backgroundColor = config.getBackgroundColor().toRgb();
       this.labelColor = config.getLabelColor().toRgb();
@@ -352,7 +320,6 @@ export default {
         }
         let layerColor = tinycolor.fromRatio(layer.color);
         newLayers.push(new ColorLayer(name, layerColor, newColor => {
-          this.zazzleLink = null;
           layer.color = toRatioColor(newColor);
           renderer.renderFrame();
           this.scene.fire('color-change', layer);
@@ -369,7 +336,6 @@ export default {
       function toRatioColor(c) {
         return {r: c.r/0xff, g: c.g/0xff, b: c.b/0xff, a: c.a}
       }
-      this.zazzleLink = null;
     },
 
     syncLineColor() {
@@ -383,12 +349,10 @@ export default {
     // TODO: I need two background methods?
     updateBackground() {
       this.setBackgroundColor(this.backgroundColor)
-      this.zazzleLink = null;
     },
     setBackgroundColor(c) {
       this.scene.background = c;
       document.body.style.backgroundColor = toRGBA(c);
-      this.zazzleLink = null;
     },
 
     applyPalette(p) {
@@ -400,42 +364,12 @@ export default {
         if (layer.name === 'background' || layer.name === 'labels') return;
         layer.changeColor(lineColor);
       });
-    },
-
-    zazzleMugPrint() {
-      if (this.zazzleLink) {
-        window.open(this.zazzleLink, '_blank');
-        recordOpenClick(this.zazzleLink);
-        return;
-      }
-
-      this.generatingPreview = true;
-      getPrintableCanvas(this.scene).then(printableCanvas => {
-        generateZazzleLink(printableCanvas).then(link => {
-          this.zazzleLink = link;
-          window.open(link, '_blank');
-          recordOpenClick(link);
-          this.generatingPreview = false;
-        }).catch(e => {
-          this.error = e;
-          this.generatingPreview = false;
-        });
-      });
     }
   }
 }
 
 function toRGBA(c) {
     return `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})`;
-}
-
-function recordOpenClick(link) {
-  if (typeof gtag === 'undefined') return;
-
-  gtag('event', 'click', {
-    'event_category': 'Outbound Link',
-    'event_label': link
-  });
 }
 </script>
 
@@ -618,7 +552,7 @@ a:focus {
   max-height: calc(100vh - 96px);
   overflow-y: auto;
   border: 0.5px solid border-color;
-  background: rgba(7,7,15,0.97);
+  background: rgba(220,213,201,0.97);
   color: primary-text;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -642,25 +576,7 @@ a:focus {
 .message {
   border-top: 0.5px solid border-color
   border-bottom: 0.5px solid border-color
-  background: rgba(232,228,223,0.05);
-}
-
-.preview-actions {
-  display: flex;
-  padding: 8px 0;
-  margin-left: -8px;
-  margin-bottom: 14px;
-  margin-top: 1px;
-  width: desktop-controls-width;
-  flex-direction: column;
-  align-items: stretch;
-  font-size: 14px;
-  align-items: center;
-  display: flex;
-
-  .popup-help {
-    text-align: center;
-  }
+  background: rgba(70,66,59,0.05);
 }
 
 .bottom-bar {
@@ -768,12 +684,9 @@ a:focus {
     width: 100%;
     margin: 0;
 
-    .preview-actions,.error,
+    .error,
     .print-window {
       width: 100%;
-    }
-    .loading-container {
-      font-size: 12px;
     }
 
     .print-window {

@@ -45,7 +45,7 @@ export default {
     left: 0;
     display: flex;
     align-items : center;
-    font-family: labels-font;
+    font-family: headline-font;
     white-space: pre;
     padding: 8px;
     border: 1px solid transparent;
@@ -54,7 +54,7 @@ export default {
   input {
     caret-color: primary-text;
     color: transparent;
-    font-family: labels-font;
+    font-family: headline-font;
     background: transparent;
     display: flex;
     align-items: center;
