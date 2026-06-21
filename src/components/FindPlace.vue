@@ -476,6 +476,7 @@ input {
 .loading {
   padding: 4px 8px;
   position: relative;
+  color: primary-text;
 }
 .loading svg {
   margin-right: 8px;
