@@ -24,10 +24,13 @@
 
         <h3>Animation</h3>
         <div class='row'>
-          <label class='col'>
-            <input type='checkbox' v-model='animateRoads' @change='saveAnimationPrefs'>
-            Animate roads connecting
-          </label>
+          <label class='col' for='animate-roads'>Animate roads connecting</label>
+          <div class='col c-2'>
+            <div class='checkbox-wrapper-9'>
+              <input class='tgl tgl-flat' id='animate-roads' type='checkbox' v-model='animateRoads' @change='saveAnimationPrefs'>
+              <label class='tgl-btn' for='animate-roads'></label>
+            </div>
+          </div>
         </div>
         <div class='row' v-if='animateRoads'>
           <label class='col' for='connect-time'>Connect time</label>
@@ -656,6 +659,68 @@ a:focus {
 
 .c-2 {
   flex: 2
+}
+
+.checkbox-wrapper-9 {
+  .tgl {
+    display: none;
+  }
+  .tgl, .tgl:after, .tgl:before,
+  .tgl *, .tgl *:after, .tgl *:before,
+  .tgl + .tgl-btn {
+    box-sizing: border-box;
+  }
+  .tgl + .tgl-btn {
+    outline: 0;
+    display: block;
+    width: 2.6em;
+    height: 1.3em;
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+  }
+  .tgl + .tgl-btn:after,
+  .tgl + .tgl-btn:before {
+    position: relative;
+    display: block;
+    content: "";
+    width: 50%;
+    height: 100%;
+  }
+  .tgl + .tgl-btn:after {
+    left: 0;
+  }
+  .tgl + .tgl-btn:before {
+    display: none;
+  }
+  .tgl:checked + .tgl-btn:after {
+    left: 50%;
+  }
+  .tgl:focus-visible + .tgl-btn {
+    outline: 2px solid highlight-color;
+    outline-offset: 2px;
+  }
+
+  .tgl-flat + .tgl-btn {
+    padding: 2px;
+    transition: all 0.2s ease;
+    background: emphasis-background;
+    border: 2px solid border-color;
+    border-radius: 2em;
+  }
+  .tgl-flat + .tgl-btn:after {
+    transition: all 0.2s ease;
+    background: secondary-color;
+    content: "";
+    border-radius: 1em;
+  }
+  .tgl-flat:checked + .tgl-btn {
+    border-color: highlight-color;
+  }
+  .tgl-flat:checked + .tgl-btn:after {
+    left: 50%;
+    background: highlight-color;
+  }
 }
 
 @media (max-width: small-screen) {
