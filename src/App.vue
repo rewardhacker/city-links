@@ -16,7 +16,7 @@
       <div v-if='showSettings' class='print-window'>
         <h3>Palettes</h3>
         <div class='row palettes'>
-          <a href='#' v-for='p in palettes' :key='p.name' class='palette-swatch' :title='p.name'
+          <a href='#' v-for='p in palettes' :key='p.name' class='palette-swatch' :title='p.name' :aria-label='p.name + " palette"'
              @click.prevent='applyPalette(p)' :style='{background: p.background, borderColor: p.line}'>
             <span :style='{background: p.line}'></span>
           </a>
@@ -30,16 +30,16 @@
           </label>
         </div>
         <div class='row' v-if='animateRoads'>
-          <div class='col'>Connect time</div>
+          <label class='col' for='connect-time'>Connect time</label>
           <div class='col c-2'>
-            <input type='range' min='300' max='3000' step='100' v-model.number='animationSpeed' @change='saveAnimationPrefs'>
+            <input id='connect-time' type='range' min='300' max='3000' step='100' v-model.number='animationSpeed' @change='saveAnimationPrefs'>
             <span class='duration-label'>{{(animationSpeed/1000).toFixed(1)}}s</span>
           </div>
         </div>
         <div class='row' v-if='animateRoads'>
-          <div class='col'>Reveal order</div>
+          <label class='col' for='reveal-order'>Reveal order</label>
           <div class='col c-2'>
-            <select v-model='revealOrder' @change='saveAnimationPrefs'>
+            <select id='reveal-order' v-model='revealOrder' @change='saveAnimationPrefs'>
               <option value='original'>Original</option>
               <option value='center-out'>Center out</option>
               <option value='outside-in'>Outside in</option>
@@ -172,7 +172,9 @@ export default {
       backgroundColor: config.getBackgroundColor().toRgb(),
       layers: [],
       palettes,
-      animateRoads: localStorage.getItem('animateRoads') !== 'false',
+      animateRoads: localStorage.getItem('animateRoads')
+        ? localStorage.getItem('animateRoads') !== 'false'
+        : !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
       animationSpeed: Number.parseInt(localStorage.getItem('animationSpeed'), 10) || 1200,
       revealOrder: localStorage.getItem('revealOrder') || 'original',
       exportingAnimation: false

@@ -1,10 +1,11 @@
 <template>
   <div v-click-outside='looseFocus' class='can-drag'>
     <div class='editable-label'>
-      <span :class='{printable}'>{{modelValue}}</span>
+      <span :class='{printable}' aria-hidden='true'>{{modelValue}}</span>
       <input
         v-bind:value="modelValue"
         v-on:input="$emit('update:modelValue', $event.target.value)"
+        aria-label='City label'
         ref='input'
       >
     </div>

@@ -1,6 +1,6 @@
 
 <template>
-<div class='vue-colorpicker' @click='showPicker = true' v-click-outside='hide' >
+<div class='vue-colorpicker' role='button' tabindex='0' aria-haspopup='true' :aria-expanded='showPicker' aria-label='Choose color' @click='showPicker = true' @keydown.enter.prevent='showPicker = true' @keydown.space.prevent='showPicker = true' v-click-outside='hide' >
   <span class='vue-colorpicker-btn' :style='btnStyle' ref='triggerButton'></span>
   <div class='vue-colorpicker-panel' v-show='showPicker' :style="{left: panelLeft, top: panelTop}">
     <component :is='pickerType' :modelValue='colors' @update:modelValue='changeColor'></component>
@@ -129,6 +129,10 @@ export default {
   box-sizing: border-box;
   font-size: 0;
   cursor: pointer;
+  &:focus {
+    outline: 2px solid #e8e4df;
+    outline-offset: 2px;
+  }
   &-btn {
     display: inline-block;
     width: 30px;

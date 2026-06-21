@@ -383,7 +383,8 @@ input {
   height: 100%;
   font-size: 16px;
   &:focus {
-    outline: none;
+    outline: 2px solid primary-text;
+    outline-offset: 2px;
   }
 }
 
@@ -430,6 +431,10 @@ input {
   transition: color 0.2s ease;
   &:hover {
     color: highlight-color;
+  }
+  &:focus {
+    outline: 2px solid highlight-color;
+    outline-offset: 2px;
   }
 }
 
