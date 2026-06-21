@@ -581,6 +581,7 @@ a:focus {
   overflow-y: auto;
   border: 0.5px solid border-color;
   background: rgba(7,7,15,0.97);
+  color: primary-text;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   width: desktop-controls-width;
