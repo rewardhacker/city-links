@@ -46,6 +46,7 @@ export default class GridLayer {
     this.animationDuration = 1200;
     this.revealOrder = 'original';
     this.loopAnimation = false;
+    this.boomerang = false;
     counter += 1;
   }
 
@@ -167,12 +168,53 @@ export default class GridLayer {
 
       if (onComplete) onComplete();
       if (this.loopAnimation && !this._disposed) {
-        this._ways = orderWays(ways, this.revealOrder);
-        lines.count = 0;
-        lines.isDirtyBuffer = true;
-        if (this.scene) this.scene.renderFrame();
-        this.animateReveal(duration);
+        if (this.boomerang) {
+          this.retract(duration, () => {
+            if (this._disposed) return;
+            this._ways = orderWays(ways, this.revealOrder);
+            this.animateReveal(duration);
+          });
+        } else {
+          this._ways = orderWays(ways, this.revealOrder);
+          lines.count = 0;
+          lines.isDirtyBuffer = true;
+          if (this.scene) this.scene.renderFrame();
+          this.animateReveal(duration);
+        }
       }
+    };
+
+    requestAnimationFrame(step);
+  }
+
+  // Un-reveals the city back to 0 (mirror of animateReveal), so a looping
+  // boomerang plays forward then backward instead of hard-cutting to blank -
+  // no instant jump, the roads just retract the way they were drawn.
+  retract(duration = this.animationDuration, onComplete) {
+    let lines = this.lines;
+    if (!lines || !lines.count) {
+      if (onComplete) onComplete();
+      return;
+    }
+
+    let start = performance.now();
+    let startCount = lines.count;
+
+    let step = () => {
+      if (this._disposed || this.lines !== lines) return;
+
+      let t = Math.min(1, (performance.now() - start) / duration);
+      let eased = 1 - Math.pow(1 - t, 3);
+      lines.count = Math.max(0, Math.round(startCount * (1 - eased)));
+      lines.isDirtyBuffer = true;
+      if (this.scene) this.scene.renderFrame();
+
+      if (t < 1) {
+        requestAnimationFrame(step);
+        return;
+      }
+
+      if (onComplete) onComplete();
     };
 
     requestAnimationFrame(step);

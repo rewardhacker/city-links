@@ -63,6 +63,15 @@
             </div>
           </div>
         </div>
+        <div class='row' v-if='animateRoads && loopAnimation'>
+          <label class='col' for='boomerang'>Boomerang</label>
+          <div class='col c-2'>
+            <div class='checkbox-wrapper-9'>
+              <input class='tgl tgl-flat' id='boomerang' type='checkbox' v-model='boomerang' @change='saveAnimationPrefs'>
+              <label class='tgl-btn' for='boomerang'></label>
+            </div>
+          </div>
+        </div>
         <div class='row'>
           <a href='#' @click.prevent='replayAnimation' class='col'>Replay</a>
           <span class='col c-2'>
@@ -168,6 +177,7 @@ export default {
       animationSpeed: Number.parseInt(localStorage.getItem('animationSpeed'), 10) || 1200,
       revealOrder: localStorage.getItem('revealOrder') || 'original',
       loopAnimation: localStorage.getItem('loopAnimation') === 'true',
+      boomerang: localStorage.getItem('boomerang') === 'true',
       exportingAnimation: false
     }
   },
@@ -226,6 +236,7 @@ export default {
       gridLayer.animationDuration = this.animationSpeed;
       gridLayer.revealOrder = this.revealOrder;
       gridLayer.loopAnimation = this.loopAnimation;
+      gridLayer.boomerang = this.boomerang;
       gridLayer.setGrid(grid);
       this.scene.add(gridLayer)
       this.gridLayer = gridLayer;
@@ -236,7 +247,11 @@ export default {
       localStorage.setItem('animationSpeed', this.animationSpeed);
       localStorage.setItem('revealOrder', this.revealOrder);
       localStorage.setItem('loopAnimation', this.loopAnimation);
-      if (this.gridLayer) this.gridLayer.loopAnimation = this.loopAnimation;
+      localStorage.setItem('boomerang', this.boomerang);
+      if (this.gridLayer) {
+        this.gridLayer.loopAnimation = this.loopAnimation;
+        this.gridLayer.boomerang = this.boomerang;
+      }
     },
 
     replayAnimation() {
@@ -245,6 +260,7 @@ export default {
       this.gridLayer.animationDuration = this.animationSpeed;
       this.gridLayer.revealOrder = this.revealOrder;
       this.gridLayer.loopAnimation = this.loopAnimation;
+      this.gridLayer.boomerang = this.boomerang;
       this.gridLayer.replay();
     },
 
