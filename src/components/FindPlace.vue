@@ -22,7 +22,7 @@
           <a @click.prevent='pickSuggestion(suggestion)' class='suggestion'
           href='#'>
           <span>
-          {{suggestion.name}} <small>({{suggestion.type}})</small>
+          {{suggestion.name}} <small>({{suggestion.levelLabel}})</small>
           </span>
           </a>
         </li>
