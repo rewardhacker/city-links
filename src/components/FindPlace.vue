@@ -2,7 +2,7 @@
 <div class='find-place' :class='{centered: boxInTheMiddle }'>
   <div v-if='boxInTheMiddle'>
     <h3 class='site-header'>city links</h3>
-    <p class='description'>This website renders every single road within a city</p>
+    <p class='description'>Pick a city and watch every road in it come to life</p>
   </div>
   <form v-on:submit.prevent="onSubmit" class='search-box'>
       <input class='query-input' v-model='enteredInput' type='text' placeholder='Enter a city name to start' ref='input'>
